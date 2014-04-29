@@ -1,0 +1,28 @@
+---
+- shell: service mysql status
+  register: serverstatus
+  ignore_errors: yes
+
+- name: Determine cluster master
+  set_fact:
+    is_cluster_master="{{ serverstatus.rc == 0 }}"
+
+- name: dump database
+  mysql_db:
+    login_user="{{ master_user }}"
+    login_password="{{ master_password }}"
+    name="{{ item }}"
+    state=dump
+    target="/tmp/{{ item }}.dmp.gz"
+  with_items:
+    - "{{ databases }}"
+  when: "is_cluster_master"
+
+- name: retrieve database dumps
+  fetch:
+    dest=/tmp/
+    src="/tmp/{{ item }}.dmp.gz"
+    flat=yes
+  with_items:
+    - "{{ databases }}"
+  when: "is_cluster_master"

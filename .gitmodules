@@ -1,0 +1,6 @@
+[submodule "roles/mysql-replication-slave"]
+	path = roles/mysql-replication-slave
+	url = ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/mysql-replication-slave.git
+[submodule "roles/mysql-replication-master"]
+	path = roles/mysql-replication-master
+	url = ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/mysql-replication-master.git

@@ -1,0 +1,10 @@
+---
+- name: Install rsync
+  apt:
+    pkg=rsync
+    state=latest
+
+- name: Allow SSH key from replication slave
+  authorized_key:
+    user=jrodrigu
+    key="{{ lookup('file', '/tmp/id_rsa.pub') }}"

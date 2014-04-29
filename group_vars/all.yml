@@ -1,0 +1,8 @@
+---
+master_host: mysql.forgeservicelab.fi
+master_user: root
+master_password: ""
+replication_user: replicator
+replication_password: replipass
+databases:
+  - plaza_production
