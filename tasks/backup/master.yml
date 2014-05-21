@@ -1,10 +1,15 @@
 ---
 - name: Install rsync
   apt:
-    pkg=rsync
-    state=latest
+    pkg: rsync
+    state: latest
+
+- name: Create system user for replication rsync
+  user:
+    name: replicator
+    system: yes
 
 - name: Allow SSH key from replication slave
   authorized_key:
-    user=jrodrigu
-    key="{{ lookup('file', '/tmp/id_rsa.pub') }}"
+    user: replicator
+    key: "{{ lookup('file', '/tmp/id_rsa.pub') }}"
