@@ -1,0 +1,59 @@
+---
+- name: Set up cron entry for daily mysql snapshot
+  cron:
+    name: "Daily plaza database snapshot"
+    user: replicator
+    special_time: daily
+    job: /usr/bin/mysqldump -u root -B plaza_production --dump-slave=1 | gzip > /data/database_snapshots/plaza/plaza_production-`date +\%F`.sql.gz
+
+- name: set up cron entry for daily postgresql snapshot
+  cron:
+    name: "Daily database server snapshot"
+    user: postgres
+    special_time: daily
+    job: /usr/bin/psql -c 'select pg_xlog_replay_pause()'; /usr/bin/pg_dumpall | gzip > /data/database_snapshots/dbserver/dbserver-`date +\%F`.psql.gz; /usr/bin/psql -c 'select pg_xlog_replay_resume()'
+
+- name: Set up cron entry for daily plaza filesystem snapshot
+  cron:
+    name: "Daily plaza filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/plaza_`date +\%F`.tar.gz /data/filesystem/plaza
+
+- name: Set up cron entry for daily gitlab filesystem snapshot
+  cron:
+    name: "Daily gitlab filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/gitlab_`date +\%F`.tar.gz /data/filesystem/gitlab
+
+- name: Set up cron entry for daily jenkins filesystem snapshot
+  cron:
+    name: "Daily jenkins filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/jenkins_`date +\%F`.tar.gz /data/filesystem/jenkins
+
+- name: Set up hourly filesystem synchronization for plaza
+  cron:
+    name: "Hourly plaza filesystem sync"
+    user: replicator
+    minute: 55
+    hour: "0-5,7-23"
+    job: /usr/bin/rsync -a --inplace --rsh='ssh' replicator@nfs.forgeservicelab.fi:/data/export/ /data/filesystem/plaza
+
+- name: Set up hourly filesystem synchronization for gitlab
+  cron:
+    name: "Hourly gitlab filesystem sync"
+    user: replicator
+    minute: 55
+    hour: "0-5,7-23"
+    job: /usr/bin/rsync -a --inplace --rsh='ssh' gitlab@git.forgeservicelab.fi:/data/apps/gitlab/repositories /data/filesystem/gitlab
+
+- name: Set up hourly filesystem synchronization for jenkins job configurations
+  cron:
+    name: "Hourly jenkins job configurations sync"
+    user: replicator
+    minute: 55
+    hour: "0-5,7-23"
+    job: /usr/bin/rsync -am --exclude='promotions/' --include='*/' --include='config.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:jobs /data/filesystem/jenkins
