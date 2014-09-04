@@ -1,5 +1,5 @@
-Plaza-Replicator
-================
+Backup Server
+=============
 
 Ansible playbook to set up a replication/backup server against FORGE ServiceLab drupal environment.
 
