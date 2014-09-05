@@ -56,4 +56,4 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: /usr/bin/rsync -am --exclude='promotions/' --include='*/' --include='config.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:jobs /data/filesystem/jenkins
+    job: /usr/bin/rsync -am --exclude='promotions/' --include='*/' --include='config.xml' --include='credentials.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:. /data/filesystem/jenkins
