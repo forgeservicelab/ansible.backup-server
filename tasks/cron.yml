@@ -27,12 +27,19 @@
     special_time: daily
     job: /bin/tar czf /data/filesystem_snapshots/gitlab_`date +\%F`.tar.gz /data/filesystem/gitlab
 
-- name: Set up cron entry for daily jenkins filesystem snapshot
+- name: Set up cron entry for daily jenkins configuration filesystem snapshot
   cron:
-    name: "Daily jenkins filesystem snapshot"
+    name: "Daily jenkins configuration filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/jenkins_`date +\%F`.tar.gz /data/filesystem/jenkins
+    job: /bin/tar czf /data/filesystem_snapshots/jenkins_conf_`date +\%F`.tar.gz --exclude=jobs /data/filesystem/jenkins
+
+- name: Set up cron entry for daily jenkins job filesystem snapshot
+  cron:
+    name: "Daily jenkins job filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/jenkins_jobs_`date +\%F`.tar.gz /data/filesystem/jenkins/jobs
 
 - name: Set up hourly filesystem synchronization for plaza
   cron:
@@ -52,7 +59,7 @@
 
 - name: Set up hourly filesystem synchronization for jenkins job configurations
   cron:
-    name: "Hourly jenkins job configurations sync"
+    name: "Hourly jenkins filesystem sync"
     user: replicator
     minute: 55
     hour: "0-5,7-23"
