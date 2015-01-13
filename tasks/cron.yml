@@ -64,3 +64,14 @@
     minute: 55
     hour: "0-5,7-23"
     job: /usr/bin/rsync -am --exclude='promotions/' --include='*/' --include='config.xml' --include='credentials.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:. /data/filesystem/jenkins
+
+- name: Set up daily synchronization of jenkins performance results
+  cron:
+    name: "Daily jenkins {{ item }} performance results"
+    user: replicator
+    special_time: daily
+    job: "/usr/bin/rsync -amz --no-links --exclude='archive/' --include='*/' --include='*.jtl' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:jobs/Plaza-Performance-testing-Continuously-{{ item }}/builds/ /data/performance/{{ item }}/"
+  with_items:
+    - DEVEL
+    - TESTING
+    - PRODUCTION
