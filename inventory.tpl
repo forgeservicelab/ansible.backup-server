@@ -1,8 +1,8 @@
-[mysql-master]
+[mysql_master]
 mysql01
 mysql02
 
-[nfs-master]
+[nfs_master]
 nfs01
 nfs02
 
