@@ -1,9 +1,26 @@
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/common.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/backup-source.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/backup-target.git
+  path: roles/
+
 - src: https://github.com/zenoamaro/ansible-postgresql.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/mysql-replication-slave.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/mysql-replication-master.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/postgresql-replication-master.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/postgresql-replication-standby.git
+  path: roles/
+
 - src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/forge_ssl.git
+  path: roles/
