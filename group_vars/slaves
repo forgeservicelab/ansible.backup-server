@@ -1,0 +1,3 @@
+plaza_filesystem_source: /data/export/
+redmine_filesystem_source: /opt/redmine/files
+gitlab_filesystem_source: /data/apps/gitlab/repositories

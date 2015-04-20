@@ -20,6 +20,13 @@
     special_time: daily
     job: /bin/tar czf /data/filesystem_snapshots/plaza_`date +\%F`.tar.gz /data/filesystem/plaza
 
+- name: Set up cron entry for daily redmine filesystem snapshot
+  cron:
+    name: "Daily redmine filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/redmine_`date +\%F`.tar.gz /data/filesystem/redmine
+
 - name: Set up cron entry for daily gitlab filesystem snapshot
   cron:
     name: "Daily gitlab filesystem snapshot"
@@ -47,7 +54,15 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: /usr/bin/rsync -a --inplace --rsh='ssh' replicator@nfs.forgeservicelab.fi:/data/export/ /data/filesystem/plaza
+    job: "/usr/bin/rsync -a --inplace --rsh='ssh' replicator@nfs.forgeservicelab.fi:{{ plaza_filesystem_source }} /data/filesystem/plaza"
+
+- name: Set up hourly filesystem syncrhonization for redmine
+  cron:
+    name: "Hourly redmine filesystem sync"
+    user: replicator
+    minute: 55
+    hour: "0-5,7-23"
+    job: "/usr/bin/rsync -a --inplace --rsh='ssh' replicator@support.forgeservicelab.fi:{{ redmine_filesystem_source }} /data/filesystem/redmine"
 
 - name: Set up hourly filesystem synchronization for gitlab
   cron:
@@ -55,7 +70,7 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: /usr/bin/rsync -a --inplace --rsh='ssh' gitlab@git.forgeservicelab.fi:/data/apps/gitlab/repositories /data/filesystem/gitlab
+    job: "/usr/bin/rsync -a --inplace --rsh='ssh' gitlab@git.forgeservicelab.fi:{{ gitlab_filesystem_source }} /data/filesystem/gitlab"
 
 - name: Set up hourly filesystem synchronization for jenkins job configurations
   cron:
