@@ -4,7 +4,7 @@
     name: "Daily plaza database snapshot"
     user: replicator
     special_time: daily
-    job: /usr/bin/mysqldump -u root -B plaza_production --dump-slave=1 | gzip > /data/database_snapshots/plaza/plaza_production-`date +\%F`.sql.gz
+    job: mysql -u root -e 'STOP SLAVE SQL_THREAD;'; /usr/bin/mysqldump -u root -B plaza_production --dump-slave=1 | gzip > /data/database_snapshots/plaza/plaza_production-`date +\%F`.sql.gz; mysql -u root -e 'START SLAVE SQL_THREAD;'
 
 - name: set up cron entry for daily postgresql snapshot
   cron:
