@@ -18,35 +18,42 @@
     name: "Daily plaza filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/plaza_`date +\%F`.tar.gz /data/filesystem/plaza
+    job: /bin/tar czf /data/filesystem_snapshots/plaza/plaza_`date +\%F`.tar.gz /data/filesystem/plaza
 
 - name: Set up cron entry for daily redmine filesystem snapshot
   cron:
     name: "Daily redmine filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/redmine_`date +\%F`.tar.gz /data/filesystem/redmine
+    job: /bin/tar czf /data/filesystem_snapshots/redmine/redmine_`date +\%F`.tar.gz /data/filesystem/redmine
 
 - name: Set up cron entry for daily gitlab filesystem snapshot
   cron:
     name: "Daily gitlab filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/gitlab_`date +\%F`.tar.gz /data/filesystem/gitlab
+    job: /bin/tar czf /data/filesystem_snapshots/gitlab/gitlab_`date +\%F`.tar.gz /data/filesystem/gitlab
 
 - name: Set up cron entry for daily jenkins configuration filesystem snapshot
   cron:
     name: "Daily jenkins configuration filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/jenkins_conf_`date +\%F`.tar.gz --exclude=jobs /data/filesystem/jenkins
+    job: /bin/tar czf /data/filesystem_snapshots/jenkins/jenkins_conf_`date +\%F`.tar.gz --exclude=jobs /data/filesystem/jenkins
 
 - name: Set up cron entry for daily jenkins job filesystem snapshot
   cron:
     name: "Daily jenkins job filesystem snapshot"
     user: replicator
     special_time: daily
-    job: /bin/tar czf /data/filesystem_snapshots/jenkins_jobs_`date +\%F`.tar.gz /data/filesystem/jenkins/jobs
+    job: /bin/tar czf /data/filesystem_snapshots/jenkins/jenkins_jobs_`date +\%F`.tar.gz /data/filesystem/jenkins/jobs
+
+- name: Set up cron entry for daily ldap database filesystem snapshot
+  cron:
+    name: "Daily ldap database filesystem snapshot"
+    user: replicator
+    special_time: daily
+    job: /bin/tar czf /data/filesystem_snapshots/ldap/ldap_`date +\%F`.tar.gz /data/filesystem/ldap
 
 - name: Set up hourly filesystem synchronization for plaza
   cron:
@@ -54,7 +61,7 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: "/usr/bin/rsync -a --inplace --rsh='ssh' replicator@nfs.forgeservicelab.fi:{{ plaza_filesystem_source }} /data/filesystem/plaza"
+    job: "/usr/bin/rsync -a --inplace --delete-after --rsh='ssh' replicator@nfs.forgeservicelab.fi:{{ plaza_filesystem_source }} /data/filesystem/plaza"
 
 - name: Set up hourly filesystem syncrhonization for redmine
   cron:
@@ -62,7 +69,7 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: "/usr/bin/rsync -a --inplace --rsh='ssh' replicator@support.forgeservicelab.fi:{{ redmine_filesystem_source }} /data/filesystem/redmine"
+    job: "/usr/bin/rsync -a --inplace --delete-after --rsh='ssh' replicator@support.forgeservicelab.fi:{{ redmine_filesystem_source }} /data/filesystem/redmine"
 
 - name: Set up hourly filesystem synchronization for gitlab
   cron:
@@ -70,7 +77,7 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: "/usr/bin/rsync -a --inplace --rsh='ssh' gitlab@git.forgeservicelab.fi:{{ gitlab_filesystem_source }} /data/filesystem/gitlab"
+    job: "/usr/bin/rsync -a --inplace --delete-after --rsh='ssh' gitlab@git.forgeservicelab.fi:{{ gitlab_filesystem_source }} /data/filesystem/gitlab"
 
 - name: Set up hourly filesystem synchronization for jenkins job configurations
   cron:
@@ -78,7 +85,15 @@
     user: replicator
     minute: 55
     hour: "0-5,7-23"
-    job: /usr/bin/rsync -am --exclude='promotions/' --include='*/' --include='config.xml' --include='credentials.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:. /data/filesystem/jenkins
+    job: "/usr/bin/rsync -am --delete-after --exclude='promotions/' --include='*/' --include='config.xml' --include='credentials.xml' --exclude='*' --rsh='ssh' jenkins@ci.forgeservicelab.fi:. /data/filesystem/jenkins"
+
+- name: Set up hourly filesystem synchronization for ldap database
+  cron:
+    name: "Hourly ldap database filesystem sync"
+    user: replicator
+    minute: 55
+    hour: "0-5,7-23"
+    job: "/usr/bin/rsync -a --inplace --delete-after --include='*/' --exclude='/*' --rsh='ssh' ldap@auth.forgeservicelab.fi:{{ ldap_filesystem_source }}/ /data/filesystem/ldap/"
 
 - name: Set up daily synchronization of jenkins performance results
   cron:
