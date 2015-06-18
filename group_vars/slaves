@@ -2,3 +2,4 @@ plaza_filesystem_source: /data/export/
 redmine_filesystem_source: /opt/redmine/files
 gitlab_filesystem_source: /data/apps/gitlab/repositories
 ldap_filesystem_source: /var/lib/ldap/auth2.forgeservicelab.fi
+warehouse_retention_days: 365

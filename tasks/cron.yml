@@ -105,3 +105,19 @@
     - DEVEL
     - TESTING
     - PRODUCTION
+
+- name: Upload warehouse cleanup script
+  copy:
+    src: scripts/purge.py
+    dest: /opt/purge.py
+    mode: 0755
+
+- name: Set up daily warehouse cleanup
+  cron:
+    name: "Daily purge of {{ item }} snapshots"
+    user: replicator
+    special_time: daily
+    job: "/opt/purge.py -p {{ warehouse_retention_days }} -t /data/{{ item }}_snapshots/"
+  with_items:
+    - database
+    - filesystem
