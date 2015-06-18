@@ -1,0 +1,9 @@
+/var/mail/*
+{
+  rotate 7
+  daily
+  missingok
+  notifempty
+  delaycompress
+  compress
+}
