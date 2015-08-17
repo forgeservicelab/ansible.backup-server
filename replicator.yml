@@ -1,0 +1,135 @@
+---
+- hosts: mysql_master
+  sudo: true
+  roles:
+    - role: mysql-replication-master
+      master_user: root
+      master_password: ""
+      replication_user: replicator
+      replication_password: <YOUR REPLICATOR PASSWORD>
+      mysql_conf_file: /etc/mysql/my.cnf
+      control_dump_location: /tmp/
+      databases:
+        - plaza_production
+
+- hosts: postgresql_master
+  sudo: true
+  roles:
+    - role: postgresql-replication-master
+      control_dump_location: /tmp/postgresql
+      postgresql_config_file: /etc/postgresql/9.3/main/postgresql.conf
+      postgresql_hba_file: /etc/postgresql/9.3/main/pg_hba.conf
+      postgresql_data_dir: /var/lib/postgresql/9.3/main/
+      standby_definitions:
+        - 192.168.2.13/32
+      replication_config:
+        - { key: wal_level, value: hot_standby }
+        - { key: max_wal_senders, value: 3 }
+        - { key: checkpoint_segments, value: 16 }
+        - { key: wal_keep_segments, value: 32 }
+      tags: replication
+
+- hosts: slaves
+  sudo: true
+  roles:
+    - role: forge_ssl
+    - role: postgresql-replication-standby
+      control_dump_location: /tmp/postgresql/
+      postgresql_master_host: 192.168.2.29
+      postgresql_config_file: /etc/postgresql/9.3/main/postgresql.conf
+      postgresql_data_dir: /var/lib/postgresql/9.3/main
+      postgresql_hba_file: /etc/postgresql/9.3/main/pg_hba.conf
+      postgresql_hot_standby: on
+      postgresql_ssl: on
+      postgresql_ssl_cert_file: /etc/ssl/forgeservicelab.fi.crt.wholechain
+      postgresql_ssl_key_file: /etc/ssl/forgeservicelab.fi.key
+      tags: replication
+
+    - role: mysql-replication-slave
+      master_host: mysql.forgeservicelab.fi
+      master_user: root
+      master_password: ""
+      replication_user: replicator
+      replication_password: <YOUR REPLICATOR PASSWORD>
+      control_dump_location: /tmp/
+      datadir: /data/database
+      databases:
+        - plaza_production
+
+    - role: backup-target
+      block_device: /dev/vdb1
+      ssh_control_location: /tmp/sshkey.pub
+      target_data_directories:
+        - { path: database, owner: mysql }
+        - { path: filesystem/redmine, owner: replicator }
+        - { path: filesystem/plaza, owner: replicator }
+        - { path: filesystem/gilab, owner: replicator }
+        - { path: filesystem/jenkins, owner: replicator }
+        - { path: filesystem/ldap, owner: replicator }
+        - { path: database_snapshots/plaza, owner: replicator }
+        - { path: database_snapshots/dbserver, owner: postgres }
+        - { path: filesystem_snapshots/redmine, owner: replicator }
+        - { path: filesystem_snapshots/plaza, owner: replicator }
+        - { path: filesystem_snapshots/gitlab, owner: replicator }
+        - { path: filesystem_snapshots/jenkins, owner: replicator }
+        - { path: filesystem_snapshots/ldap, owner: replicator }
+        - { path: performance, owner: replicator }
+        - { path: performance/DEVEL, owner: replicator }
+        - { path: performance/TESTING, owner: replicator }
+        - { path: performance/PRODUCTION, owner: replicator }
+  tasks:
+    - name: Patch broken postgresql logrotation
+      copy:
+        dest: /etc/logrotate.d/postgresql-cleanup
+        content: |
+          /var/log/postgresql/postgresql-2???-??-??_* {
+            daily
+            rotate 0
+            maxage 15
+            su root root
+          }
+    - include: tasks/cron.yml
+    - name: Add log rotation for mail spool directory
+      copy:
+        src: scripts/mail.logrotate
+        dest: /etc/logrotate.d/localmail
+        mode: 0644
+
+- hosts: nfs_master
+  sudo: true
+  roles:
+    - role: backup-source
+      backup_client_pubkey: /tmp/sshkey.pub
+
+- hosts: jenkins_master
+  sudo: true
+  roles:
+    - role: backup-source
+      backup_client_pubkey: /tmp/sshkey.pub
+      source_user: jenkins
+
+- hosts: gitlab_master
+  sudo: true
+  roles:
+    - role: backup-source
+      backup_client_pubkey: /tmp/sshkey.pub
+      source_user: gitlab
+
+- hosts: redmine_master
+  sudo: true
+  roles:
+    - role: backup-source
+      backup_client_pubkey: /tmp/sshkey.pub
+      source_user: redmine
+
+- hosts: ldap_master
+  sudo: true
+  roles:
+    - role: backup-source
+      backup_client_pubkey: /tmp/sshkey.pub
+      source_user: ldap
+  tasks:
+    - name: ldaprep
+      user:
+        name: ldap
+        shell: /bin/sh
